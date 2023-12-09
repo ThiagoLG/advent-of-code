@@ -9,15 +9,19 @@ class CubesChallenge:
     }
 
     def is_valid_game(self, game: dict):
-        for play in game.get('plays'):
-            if any(play.get(color) > self.cubes_boundaries.get(color) for color in play.keys()):
+        for play in game.get('plays', []):
+            if any(play.get(color, 0) > self.cubes_boundaries.get(color, 0) for color in play.keys()):
                 return False
 
         return True
 
     def transform_data(self, line: str):
-        game = dict({'game_id': 0, 'plays': []})
-        [game_id, plays] = line.split(':')
+        game_id, plays = line.split(':')
+        game = dict({
+            'game_id': int(re.sub(r'[\D\s]', '', game_id)),
+            'plays': []
+        })
+       
         plays_list = plays.strip().split(';')
 
         for play in plays_list:
@@ -25,14 +29,11 @@ class CubesChallenge:
             sorted_cubes_dict = dict()
 
             for cube in sorted_cubes:
-                [count, color] = cube.strip().split(' ')
+                count, color = cube.strip().split(' ')
                 sorted_cubes_dict.update({color: int(count)})
 
             game['plays'].append(sorted_cubes_dict)
 
-        game.update({
-            'game_id': int(re.sub(r'[\D\s]', '', game_id))
-        })
         return game
 
     def validate(self):
@@ -44,6 +45,7 @@ class CubesChallenge:
                 if is_valid:
                     valid_games_sum += game.get('game_id')
             print(f'Sum of valid game\'s ids: {valid_games_sum}')
+
 
 # Class instantiation
 cc = CubesChallenge()
